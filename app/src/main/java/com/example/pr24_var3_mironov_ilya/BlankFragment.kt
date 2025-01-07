@@ -2,7 +2,6 @@ package com.example.pr24_var3_mironov_ilya
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,10 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 
 
 class BlankFragment : Fragment() {
@@ -23,12 +21,11 @@ class BlankFragment : Fragment() {
     private val tasks = mutableListOf<Task>()
     private lateinit var addButton : Button
     private lateinit var view : View
-    private lateinit var navController: NavController
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         view = inflater.inflate(R.layout.fragment_task_list, container, false)
         recyclerView = view.findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -43,10 +40,10 @@ class BlankFragment : Fragment() {
             val sharedPreferences = requireContext().getSharedPreferences("tasks", Context.MODE_PRIVATE)
             var counterTasks = sharedPreferences.getInt("counterTasks", 1)
             counterTasks += 1
-            sharedPreferences.edit().putInt("counterTasks", counterTasks).commit()
+            sharedPreferences.edit().putInt("counterTasks", counterTasks).apply()
             loadTasks()
 
-            val snackbar = com.google.android.material.snackbar.Snackbar.make(view, "Задача добавлена", com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+            val snackbar = Snackbar.make(view, "Задача добавлена", Snackbar.LENGTH_LONG)
             snackbar.show()
         }
 
@@ -59,27 +56,26 @@ class BlankFragment : Fragment() {
     {
         AlertDialog.Builder(requireContext())
             .setTitle("Точно удаляем?")
-            .setPositiveButton("Да") { _, _ ->
+            .setPositiveButton("Удаляем") { _, _ ->
                 val sharedPreferences = requireContext().getSharedPreferences("tasks", Context.MODE_PRIVATE)
-                sharedPreferences.edit().remove("task_${task.id}_title").commit()
-                sharedPreferences.edit().remove("task_${task.id}_description").commit()
+                sharedPreferences.edit().remove("task_${task.id}_title").apply()
+                sharedPreferences.edit().remove("task_${task.id}_description").apply()
 
                 var counterTasks = sharedPreferences.getInt("counterTasks", 1)
 
                 for (i in task.id..counterTasks) {
-                    val title = sharedPreferences.getString("task_${i + 1}_title", "Задача")
-                    val description = sharedPreferences.getString("task_${i + 1}_description", "Описание задачи")
-                    sharedPreferences.edit().putString("task_${i}_title", title).commit()
-                    sharedPreferences.edit().putString("task_${i}_description", description).commit()
+                    val title = sharedPreferences.getString("task_${i + 1}_title", "Новая задача")
+                    val description = sharedPreferences.getString("task_${i + 1}_description", "Типо описание")
+                    sharedPreferences.edit().putString("task_${i}_title", title).apply()
+                    sharedPreferences.edit().putString("task_${i}_description", description).apply()
                 }
 
                 counterTasks -= 1
-                sharedPreferences.edit().putInt("counterTasks", counterTasks).commit()
+                sharedPreferences.edit().putInt("counterTasks", counterTasks).apply()
                 loadTasks()
-                val snackbar = com.google.android.material.snackbar.Snackbar.make(view, "Задача удалена", com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
-                snackbar.show()
+                Snackbar.make(view, "Mission completed", Snackbar.LENGTH_LONG).show()
             }
-            .setNegativeButton("Отмена", null)
+            .setNegativeButton("Отбой", null)
             .show()
     }
 
@@ -88,8 +84,8 @@ class BlankFragment : Fragment() {
         val sharedPreferences = requireContext().getSharedPreferences("tasks", Context.MODE_PRIVATE)
         val counterTasks = sharedPreferences.getInt("counterTasks", 1)
         for (i in 1..counterTasks) {
-            val title = sharedPreferences.getString("task_${i}_title", "Задача")
-            val description = sharedPreferences.getString("task_${i}_description", "Описание задачи")
+            val title = sharedPreferences.getString("task_${i}_title", "Новая задача")
+            val description = sharedPreferences.getString("task_${i}_description", "Типо описание")
             if (title != null && description != null) {
                 tasks.add(Task(i, title, description))
             }
@@ -106,14 +102,14 @@ class BlankFragment : Fragment() {
         descriptionEditText.setText(task.description)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Редактировать задачу")
+            .setTitle("Редачим")
             .setView(dialogView)
             .setPositiveButton("Сохранить") { _, _ ->
                 val newTitle = titleEditText.text.toString()
                 val newDescription = descriptionEditText.text.toString()
                 updateTask(task, newTitle, newDescription)
             }
-            .setNegativeButton("Отмена", null)
+            .setNegativeButton("Отбой", null)
             .show()
     }
 

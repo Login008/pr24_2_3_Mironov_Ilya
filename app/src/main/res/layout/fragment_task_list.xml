@@ -13,6 +13,7 @@
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:background="@drawable/roundbutton"
+        android:backgroundTint="@color/aquamarine"
         android:id="@+id/buttonAdd"
         android:text="+"
         android:textColor="@color/white"
